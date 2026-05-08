@@ -30,24 +30,52 @@ flowchart TD
   * **Cloud Run Subscription**: Routes data to a backend service for real-time processing.
 * **Cloud Run**: A serverless compute environment that runs the backend service. It processes the incoming Pub/Sub messages and writes the structured data to the Firestore database.
 * **Firestore**: A flexible, scalable NoSQL cloud database. It stores the latest processed sensor readings, enabling real-time synchronization with the frontend application.
-* **Firebase Hosting (Web App)**: Hosts the frontend web application. The application reads data in real-time directly from Firestore and provides a live dashboard visualization of the sensors (as seen in the first attached screen).
-* **Looker Studio**: A business intelligence tool connected directly to GCP BigQuery. It fetches historical data to visualize long-term trends and metrics across the sensor network (as seen in the secondary attached screens).
+* **Firebase Hosting (Web App)**: Hosts the frontend web application. The application reads data in real-time directly from Firestore and provides a live dashboard visualization of the sensors.
+* **Looker Studio**: A business intelligence tool connected directly to GCP BigQuery. It fetches historical data to visualize long-term trends and metrics across the sensor network.
+
+---
+
+## EMQX Data Flow
+
+![EMQX Data Flow](docs/images/media__1778206762813.png)
+
+**Flow Explanation:**
+1. **Device Connection**: IoT sensors publish telemetry data (such as temperature, humidity, and status) to specific MQTT topics on the EMQX broker.
+2. **Rule Engine**: EMQX utilizes its built-in rule engine to filter and format the incoming JSON payloads in real-time.
+3. **Data Bridge / Sink**: The processed messages are securely bridged via an outbound webhook/sink directly into the **GCP Pub/Sub** topic, ensuring high throughput and decoupled delivery to Google Cloud.
+
+---
 
 ## Dashboards
 
-1. **Real-time Web App**: A dynamic, responsive dashboard hosted on Firebase. It provides live updates of current temperature, humidity, and status indicators directly from Firestore.
+### 1. Real-time Web App
+A dynamic, responsive dashboard hosted on Firebase. It provides live updates of current temperature, humidity, and status indicators directly from Firestore.
 ![Web App Dashboard](docs/images/media__1778207378981.png)
 
-2. **Looker Studio Analytics**: A comprehensive reporting interface pulling historical and aggregated data from BigQuery to uncover deeper insights.
+### 2. Looker Studio Analytics
+A comprehensive reporting interface pulling historical and aggregated data from BigQuery to uncover deeper insights.
 ![Looker Studio Analytics 1](docs/images/media__1778207660614.png)
 ![Looker Studio Analytics 2](docs/images/media__1778207660664.png)
 
-### Additional Views
+#### Additional Views
 ![View 1](docs/images/media__1778207916296.png)
 ![View 2](docs/images/media__1778207916303.png)
 ![View 3](docs/images/media__1778207916343.png)
 ![View 4](docs/images/media__1778207916357.png)
 
 ---
-*Note: The flow architecture image originally provided is referenced here:*
-![EMQX Data Flow](docs/images/media__1778206762813.png)
+
+## Conclusions
+* **Scalability**: By leveraging serverless components (Cloud Run, Firestore, Firebase, BigQuery), the system scales automatically from a few devices to millions without manual infrastructure intervention.
+* **Real-time vs Historical**: The dual-path architecture ensures ultra-low latency updates for operational dashboards (via Firestore) while independently preserving robust historical datasets for deep business intelligence (via BigQuery).
+* **Decoupling**: The usage of EMQX as a dedicated MQTT broker and GCP Pub/Sub as the main messaging hub prevents tight coupling between the devices and the application logic, increasing system fault tolerance.
+
+---
+
+## References
+* [EMQX MQTT Platform](https://www.emqx.com/en)
+* [Google Cloud Pub/Sub](https://cloud.google.com/pubsub)
+* [Google Cloud Run](https://cloud.google.com/run)
+* [Firebase Firestore & Hosting](https://firebase.google.com/)
+* [Google Cloud BigQuery](https://cloud.google.com/bigquery)
+* [Looker Studio](https://lookerstudio.google.com/)
