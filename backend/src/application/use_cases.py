@@ -14,4 +14,23 @@ class StoreSensorDataUseCase:
             timestamp=datetime.now(UTC)
         )
         self.repository.save(sensor_data)
+        
         return sensor_data
+
+import csv
+import io
+
+class ExportSensorDataCsvUseCase:
+    def __init__(self, repository: SensorRepository):
+        self.repository = repository
+
+    def execute(self) -> str:
+        data = self.repository.get_all()
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["timestamp", "temperature", "humidity", "state"])
+        for entry in data:
+            writer.writerow([entry.timestamp.isoformat(), entry.temperature, entry.humidity, entry.state])
+
+        return output.getvalue()

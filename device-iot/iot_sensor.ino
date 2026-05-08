@@ -1,7 +1,13 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <DHT.h>
 #include "secrets.h"
+
+#define dhtpin 14
+#define dhttype DHT22
+
+DHT dht(dhtpin, dhttype);
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -41,21 +47,22 @@ void reconnectMQTT() {
 }
 
 void publishTelemetry() {
-    // 1. Simulate data
-    float temp = random(215, 275) / 10.0; 
-    int hum = random(45, 65);
+    float temp = dht.readTemperature(); 
+    float hum = dht.readHumidity();
 
-    // 2. Build JSON Object
+    if (isnan(hum) || isnan(temp)) {
+        Serial.println("[ERROR] Failed to read from DHT sensor!");
+        return;
+    }
+
     StaticJsonDocument<200> doc;
     doc["temperature"] = temp;
     doc["humidity"] = hum;
-    doc["status"] = "simulated";
+    doc["status"] = "active";
 
-    // 3. Serialize
     char buffer[256];
     serializeJson(doc, buffer);
 
-    // 4. Publish
     Serial.printf("[MQTT] Sending: %s\n", buffer);
     if (client.publish(TOPIC_SENSORS, buffer)) {
         Serial.println("[MQTT] Publish OK");
@@ -65,17 +72,15 @@ void publishTelemetry() {
 }
 
 void setup() {
-    // Higher baud rate for debugging
     Serial.begin(115200);
     delay(1000);
     Serial.println("\n--- SYSTEM STARTING ---");
     Serial.flush();
 
-    randomSeed(analogRead(0));
+    dht.begin();
 
     setupWiFi();
 
-    // Verify MQTT server string isn't null
     if (strlen(MQTT_SERVER) > 0) {
         client.setServer(MQTT_SERVER, 1883);
         Serial.println("[SYSTEM] MQTT Server initialized.");
@@ -85,13 +90,11 @@ void setup() {
 }
 
 void loop() {
-    // Keep connection alive
     if (!client.connected()) {
         reconnectMQTT();
     }
     client.loop();
 
-    // Non-blocking timer
     unsigned long currentTime = millis();
     if (currentTime - lastPublishTime > PUBLISH_INTERVAL) {
         lastPublishTime = currentTime;

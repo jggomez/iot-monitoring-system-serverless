@@ -1,7 +1,8 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from src.interfaces.schemas import SensorDataRequest, SensorDataResponse, PubSubRequest
-from src.application.use_cases import StoreSensorDataUseCase
+from src.application.use_cases import StoreSensorDataUseCase, ExportSensorDataCsvUseCase
 from src.infrastructure.firestore_repository import FirestoreSensorRepository
 
 router = APIRouter()
@@ -57,3 +58,17 @@ async def store_pubsub_data(
         raise HTTPException(
             status_code=500, detail=f"Error processing message: {str(e)}"
         )
+
+@router.get("/sensors/export")
+async def export_sensor_data():
+    try:
+        use_case = ExportSensorDataCsvUseCase(_repository)
+        csv_string = use_case.execute()
+        return Response(
+            content=csv_string,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=sensor_data.csv"}
+        )
+    except Exception as e:
+        logger.error(f"Error exporting sensor data: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
