@@ -77,6 +77,12 @@ A comprehensive reporting interface pulling historical and aggregated data from 
 
 ---
 
+## IoT Layer (ESP32 Nodes) 
+
+<img width="1600" height="930" alt="WhatsApp Image 2026-05-07 at 21 27 17" src="https://github.com/user-attachments/assets/93266b82-feed-4c24-93d3-7d4a20aec560" />
+--
+<img width="1600" height="683" alt="WhatsApp Image 2026-05-07 at 21 27 18" src="https://github.com/user-attachments/assets/b0a260cb-685e-43d6-b2cb-7f2532569a2e" />
+
 ## Conclusions
 * **Scalability**: By leveraging serverless components (Cloud Run, Firestore, Firebase, BigQuery), the system scales automatically from a few devices to millions without manual infrastructure intervention.
 * **Real-time vs Historical**: The dual-path architecture ensures ultra-low latency updates for operational dashboards (via Firestore) while independently preserving robust historical datasets for deep business intelligence (via BigQuery).
