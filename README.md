@@ -3,6 +3,12 @@
 ## Project Description
 This project implements a real-time IoT sensor data pipeline and visualization architecture. It connects, processes, and streams real-time data from devices to cloud analytics and dynamic dashboards. Massive IoT data is turned into actionable intelligence by routing messages through a unified MQTT platform to Google Cloud and Firebase services for both real-time monitoring and historical analysis.
 
+## Key Features
+* **Real-time Monitoring**: Instant visualization of temperature and humidity via Firestore synchronization.
+* **Historical Data Export**: On-demand CSV generation and download from the web dashboard.
+* **Direct Sensor Integration**: Real-world data collection using ESP32 and DHT22 sensors.
+* **Scalable Analytics**: Deep insights and trend analysis using BigQuery and Looker Studio.
+
 ## Architecture
 
 The system follows an event-driven architecture, capturing sensor data via MQTT and processing it through scalable cloud services.
@@ -18,6 +24,8 @@ flowchart TD
     D -->|Stores Data| F[(Firestore)]
     
     F -->|Real-time Sync| G[Firebase Hosting Web App]
+    G -.->|Request CSV| D
+    D -.->|Download CSV| G
     E -->|Historical Data| H[Looker Studio]
 ```
 
@@ -34,7 +42,7 @@ flowchart TD
 * **Pub/Sub Subscriptions**:
   * **BigQuery Subscription**: Routes raw sensor data directly into BigQuery for long-term storage and complex data analysis.
   * **Cloud Run Subscription**: Routes data to a backend service for real-time processing.
-* **Cloud Run**: A serverless compute environment that runs the backend service. It processes the incoming Pub/Sub messages and writes the structured data to the Firestore database.
+* **Cloud Run**: A serverless compute environment that runs the backend service. It processes incoming Pub/Sub messages to update Firestore and provides a REST API for dynamic CSV data export.
 * **Firestore**: A flexible, scalable NoSQL cloud database. It stores the latest processed sensor readings, enabling real-time synchronization with the frontend application.
 * **Firebase Hosting (Web App)**: Hosts the frontend web application. The application reads data in real-time directly from Firestore and provides a live dashboard visualization of the sensors.
 * **Looker Studio**: A business intelligence tool connected directly to GCP BigQuery. It fetches historical data to visualize long-term trends and metrics across the sensor network.
