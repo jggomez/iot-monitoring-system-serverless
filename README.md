@@ -43,7 +43,7 @@ flowchart TD
 
 ## EMQX Data Flow
 
-![EMQX Data Flow](docs/images/media__1778206762813.png)
+![EMQX Data Flow](docs/images/media__1778207916296.png)
 
 **Flow Explanation:**
 1. **Device Connection**: IoT sensors publish telemetry data (such as temperature, humidity, and status) to specific MQTT topics on the EMQX broker.
@@ -56,18 +56,12 @@ flowchart TD
 
 ### 1. Real-time Web App
 A dynamic, responsive dashboard hosted on Firebase. It provides live updates of current temperature, humidity, and status indicators directly from Firestore.
-![Web App Dashboard](docs/images/media__1778207378981.png)
+![Web App Dashboard](docs/images/media__1778207916357.png)
 
 ### 2. Looker Studio Analytics
 A comprehensive reporting interface pulling historical and aggregated data from BigQuery to uncover deeper insights.
-![Looker Studio Analytics 1](docs/images/media__1778207660614.png)
-![Looker Studio Analytics 2](docs/images/media__1778207660664.png)
-
-#### Additional Views
-![View 1](docs/images/media__1778207916296.png)
-![View 2](docs/images/media__1778207916303.png)
-![View 3](docs/images/media__1778207916343.png)
-![View 4](docs/images/media__1778207916357.png)
+![Looker Studio Analytics 1](docs/images/media__1778207660664.png)
+![Looker Studio Analytics 2](docs/images/media__1778207660614.png)
 
 ---
 
