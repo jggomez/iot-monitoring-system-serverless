@@ -99,10 +99,9 @@ onSnapshot(sensorQuery, (snapshot) => {
         updateAverages(data);
         updateChart(data.reverse());
         
-        // Sync toggle if not currently transitioning
-        if (!deviceToggleBtn.disabled) {
-            syncToggleWithState(latest.state);
-        }
+        // Enable button on first sync and sync state
+        deviceToggleBtn.disabled = false;
+        syncToggleWithState(latest.state);
     }
 });
 
