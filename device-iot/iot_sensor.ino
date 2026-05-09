@@ -117,17 +117,9 @@ void setup() {
 
     pinMode(PIN_LED, OUTPUT);
 
-    for(int i=0; i<3; i++){
-        digitalWrite(PIN_LED, HIGH);
-        delay(200);
-        digitalWrite(PIN_LED, LOW);
-        delay(200);
-    }
-
     dht.begin();
     delay(3000);
     setupWiFi();
-
 
     // Verify MQTT server string isn't null
     if (strlen(MQTT_SERVER) > 0) {
