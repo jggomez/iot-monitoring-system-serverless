@@ -5,6 +5,7 @@ This project implements a real-time IoT sensor data pipeline and visualization a
 
 ## Key Features
 * **Real-time Monitoring**: Instant visualization of temperature and humidity via Firestore synchronization.
+* **Remote Device Actuation**: Bidirectional communication allowing users to control device power states (ON/OFF) directly from the dashboard.
 * **Historical Data Export**: On-demand CSV generation and download from the web dashboard.
 * **Direct Sensor Integration**: Real-world data collection using ESP32 and DHT22 sensors.
 * **Scalable Analytics**: Deep insights and trend analysis using BigQuery and Looker Studio.
@@ -15,8 +16,8 @@ The system follows an event-driven architecture, capturing sensor data via MQTT 
 
 ```mermaid
 flowchart TD
-    A[IoT Devices] -->|MQTT| B[EMQX Platform]
-    B -->|Flow| C[GCP Pub/Sub]
+    A[IoT Devices] <-->|MQTT| B[EMQX Platform]
+    B -->|Telemetry Flow| C[GCP Pub/Sub]
     
     C -->|Subscription| D[Cloud Run Service]
     C -->|Subscription| E[GCP BigQuery]
@@ -24,6 +25,11 @@ flowchart TD
     D -->|Stores Data| F[(Firestore)]
     
     F -->|Real-time Sync| G[Firebase Hosting Web App]
+    
+    G -.->|1. Toggle Command| D
+    D -.->|2. Publish MQTT Cmd| B
+    B -.->|3. Actuation| A
+    
     G -.->|Request CSV| D
     D -.->|Download CSV| G
     E -->|Historical Data| H[Looker Studio]
@@ -42,7 +48,8 @@ flowchart TD
 * **Pub/Sub Subscriptions**:
   * **BigQuery Subscription**: Routes raw sensor data directly into BigQuery for long-term storage and complex data analysis.
   * **Cloud Run Subscription**: Routes data to a backend service for real-time processing.
-* **Cloud Run**: A serverless compute environment that runs the backend service. It processes incoming Pub/Sub messages to update Firestore and provides a REST API for dynamic CSV data export.
+* **Cloud Run**: A serverless compute environment that runs the backend service. It processes incoming Pub/Sub messages to update Firestore and provides a REST API for dynamic CSV data export. It also acts as a command gateway, translating dashboard interactions into MQTT commands.
+* **Remote Actuation (Actuador)**: The system supports bidirectional communication. When a user toggles the switch on the dashboard, a command is sent to Cloud Run, which then publishes an MQTT message to the device. The device (ESP32) listens for these commands and adjusts its state (e.g., turning on/off a relay or LED) accordingly.
 * **Firestore**: A flexible, scalable NoSQL cloud database. It stores the latest processed sensor readings, enabling real-time synchronization with the frontend application.
 * **Firebase Hosting (Web App)**: Hosts the frontend web application. The application reads data in real-time directly from Firestore and provides a live dashboard visualization of the sensors.
 * **Looker Studio**: A business intelligence tool connected directly to GCP BigQuery. It fetches historical data to visualize long-term trends and metrics across the sensor network.
