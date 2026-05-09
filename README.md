@@ -37,11 +37,11 @@ flowchart TD
 
 ### Components Explanation
 
-* **IoT Layer (ESP32 Nodes)**: Distributed edge devices collecting environmental and acoustic data. They stream data using lightweight JSON payloads over MQTT. The "edge" of this system is powered by the ESP32, a powerful microcontroller with integrated Wi-Fi. In this project, it acts as a telemetry producer, sampling sensors and pushing structured data to the cloud. The C++ code for the ESP32 is located in the `device-iot/` directory.
+* **IoT Layer (ESP32 Nodes)**: Distributed edge devices collecting environmental data. They stream data using lightweight JSON payloads over MQTT. The "edge" of this system is powered by the ESP32, a powerful microcontroller with integrated Wi-Fi. In this project, it acts as a telemetry producer, sampling sensors and pushing structured data to the cloud. The C++ code for the ESP32 is located in the `device-iot/` directory.
   * **Hardware Components**: To replicate the physical setup, the following components are used:
     * **MCU**: ESP32 (NodeMCU or similar).
     * **Environment Sensor**: DHT22 (High-accuracy temperature and humidity).
-    * **Acoustic Sensor**: Analog Microphone (MAX9814 or similar) connected to an Analog-to-Digital Converter (ADC) pin.
+    * **Actuator**: LED (Status indicator or remote actuation).
     * **Connectivity**: 2.4GHz Wi-Fi.
 * **EMQX (The Unified MQTT Platform for Robotics)**: Connects, processes, and streams real-time data from millions of devices to any cloud, AI, and analytics. It turns massive IoT data into actionable intelligence. EMQX acts as the entry point, receiving messages on specific topics and routing the flow to the cloud.
 * **GCP Pub/Sub**: A highly scalable messaging service that ingests the data stream from EMQX. It acts as a central hub, decoupling the ingestion layer from the storage and processing layers.
