@@ -1,18 +1,44 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
-from src.interfaces.schemas import SensorDataRequest, SensorDataResponse, PubSubRequest
-from src.application.use_cases import StoreSensorDataUseCase, ExportSensorDataCsvUseCase
+from src.interfaces.schemas import SensorDataRequest, SensorDataResponse, PubSubRequest, DeviceCommandRequest
+from src.application.use_cases import StoreSensorDataUseCase, ExportSensorDataCsvUseCase, SendCommandUseCase
 from src.infrastructure.firestore_repository import FirestoreSensorRepository
+from src.infrastructure.mqtt_client import mqtt_service
+import os
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 _repository = FirestoreSensorRepository()
-
+_mqtt_topic = os.getenv("MQTT_TOPIC")
 
 def get_use_case():
     return StoreSensorDataUseCase(_repository)
+
+def get_mqtt_use_case():
+    return SendCommandUseCase(mqtt_service, _mqtt_topic)
+
+@router.post("/device/command")
+async def send_device_command(
+    request: DeviceCommandRequest, use_case: SendCommandUseCase = Depends(get_mqtt_use_case)
+):
+    try:
+        success = use_case.execute(status=request.status)
+        if success:
+            return {"message": f"Command {request.status} sent successfully"}
+        else:
+            # If use_case returns False, it means MQTT failed despite retry attempts
+            raise HTTPException(
+                status_code=503, 
+                detail="MQTT broker is currently unavailable or rejected the command. Please check backend logs."
+            )
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        error_msg = f"Failed to send command to MQTT broker: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 
 @router.post("/sensors", response_model=SensorDataResponse)

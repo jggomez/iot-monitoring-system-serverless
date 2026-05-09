@@ -34,3 +34,12 @@ class ExportSensorDataCsvUseCase:
             writer.writerow([entry.timestamp.isoformat(), entry.temperature, entry.humidity, entry.state])
 
         return output.getvalue()
+
+class SendCommandUseCase:
+    def __init__(self, mqtt_service, topic: str):
+        self.mqtt_service = mqtt_service
+        self.topic = topic
+
+    def execute(self, status: str):
+        message = {"status": status}
+        return self.mqtt_service.publish(self.topic, message)

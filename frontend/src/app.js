@@ -23,6 +23,14 @@ const avgHumEl = document.getElementById('avg-humidity');
 const lastUpdateEl = document.getElementById('last-update');
 const deviceStateEl = document.getElementById('device-state');
 
+// Toggle Elements
+const deviceToggleBtn = document.getElementById('device-toggle-btn');
+const toggleDot = document.getElementById('toggle-dot');
+const toggleTextOff = document.getElementById('toggle-state-text');
+const toggleTextOn = document.getElementById('toggle-state-text-on');
+
+let isDeviceOn = false;
+
 // Chart Setup
 const ctx = document.getElementById('sensorChart').getContext('2d');
 const sensorChart = new Chart(ctx, {
@@ -90,13 +98,51 @@ onSnapshot(sensorQuery, (snapshot) => {
         updateRealtimeUI(latest);
         updateAverages(data);
         updateChart(data.reverse());
+        
+        // Sync toggle if not currently transitioning
+        if (!deviceToggleBtn.disabled) {
+            syncToggleWithState(latest.state);
+        }
     }
 });
+
+function syncToggleWithState(state) {
+    const newState = state === 'ON';
+    if (newState !== isDeviceOn) {
+        isDeviceOn = newState;
+        updateToggleUI(isDeviceOn);
+    }
+}
+
+function updateToggleUI(isOn) {
+    if (isOn) {
+        deviceToggleBtn.classList.remove('bg-slate-200');
+        deviceToggleBtn.classList.add('bg-blue-600');
+        toggleDot.classList.add('translate-x-8');
+        toggleTextOff.classList.add('hidden');
+        toggleTextOn.classList.remove('hidden');
+    } else {
+        deviceToggleBtn.classList.add('bg-slate-200');
+        deviceToggleBtn.classList.remove('bg-blue-600');
+        toggleDot.classList.remove('translate-x-8');
+        toggleTextOff.classList.remove('hidden');
+        toggleTextOn.classList.add('hidden');
+    }
+}
 
 function updateRealtimeUI(latest) {
     currentTempEl.textContent = latest.temperature.toFixed(1);
     currentHumEl.textContent = latest.humidity.toFixed(1);
     deviceStateEl.textContent = `Status: ${latest.state}`;
+    
+    // Update color based on state
+    if (latest.state === 'ON') {
+        deviceStateEl.classList.add('bg-blue-100', 'text-blue-700');
+        deviceStateEl.classList.remove('bg-slate-100', 'text-slate-600');
+    } else {
+        deviceStateEl.classList.remove('bg-blue-100', 'text-blue-700');
+        deviceStateEl.classList.add('bg-slate-100', 'text-slate-600');
+    }
     
     const date = latest.timestamp.toDate();
     lastUpdateEl.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -155,3 +201,40 @@ downloadBtn.addEventListener('click', async () => {
         downloadBtn.disabled = false;
     }
 });
+
+// Device Control Logic
+async function toggleDevice() {
+    const targetState = !isDeviceOn ? 'ON' : 'OFF';
+    const originalIsOn = isDeviceOn;
+    
+    try {
+        deviceToggleBtn.disabled = true;
+        // Optimistic update
+        updateToggleUI(!originalIsOn);
+        
+        const response = await fetch('/api/v1/device/command', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: targetState }),
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to send command');
+        }
+        
+        isDeviceOn = !originalIsOn;
+        console.log(`Command ${targetState} sent successfully`);
+    } catch (error) {
+        console.error("Command error:", error);
+        alert(`Error: ${error.message}`);
+        // Revert on error
+        updateToggleUI(originalIsOn);
+    } finally {
+        deviceToggleBtn.disabled = false;
+    }
+}
+
+deviceToggleBtn.addEventListener('click', toggleDevice);

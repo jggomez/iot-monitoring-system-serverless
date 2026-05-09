@@ -32,3 +32,6 @@ class SensorDataResponse(BaseModel):
     state: str
     timestamp: str
     message: str = "Data stored successfully"
+
+class DeviceCommandRequest(BaseModel):
+    status: str
