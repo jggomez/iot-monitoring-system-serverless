@@ -73,7 +73,7 @@ flowchart TD
 A dynamic, responsive dashboard hosted on Firebase. It provides live updates of current temperature, humidity, and status indicators directly from Firestore.
 **Live URL:** [https://lab-iot-493715.web.app/](https://lab-iot-493715.web.app/)
 
-![Web App Dashboard](docs/images/media__1778207916357.png)
+<img width="1341" height="947" alt="Screenshot 2026-05-09 at 9 33 19 a m" src="https://github.com/user-attachments/assets/66be79e7-2f33-4fc3-93eb-4991cef3c479" />
 
 ### 2. Looker Studio Analytics
 A comprehensive reporting interface pulling historical and aggregated data from BigQuery to uncover deeper insights.
